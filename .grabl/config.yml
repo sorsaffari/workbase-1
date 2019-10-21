@@ -1,20 +1,55 @@
 # grabl config
-# @graknlabs_grakn_core
+# @graknlabs_workbase
 
-dependency-update:
-  dependencies:
-    - grakn:
-        org: graknlabs
-        repo: grakn
-        type: [snapshot, release]
-  run:
-    bazel run @graknlabs_build_tools//sync-dependencies-bazel $GRABL_NEW_DEPENDENCIES
-
-release-validation:
-  jobs:
-    release-validate-deps:
+dependency:
+  config:
+    dependencies:
+      - grakn:
+          org: graknlabs
+          repo: grakn
+          type: release
+  validate:
+    jobs:
+      dependency-validate-build:
+        machine: ubuntu-19.10
+        type: foreground
+        run: |
+          bazel run @graknlabs_build_tools//sync-dependencies-bazel $GRABL_NEW_DEPENDENCIES         # graql@abc123 protocol@bcd234
+          bazel run @graknlabs_build_tools//sync-dependencies-npm $GRABL_NEW_DEPENDENCIES         # graql@abc123 protocol@bcd234
+          bazel build //...
+      dependency-validate-correctness:
+        machine: ubuntu-19.10
+          type: foreground
+          run: |
+            bazel run @graknlabs_build_tools//sync-dependencies-bazel $GRABL_NEW_DEPENDENCIES         # graql@abc123 protocol@bcd234
+            bazel run @graknlabs_build_tools//sync-dependencies-npm $GRABL_NEW_DEPENDENCIES         # graql@abc123 protocol@bcd234
+            bazel build //test/basic-correctness
+    execution:
+      - depedency-validate-build
+      - dependency-validate-correctness
+  update:
+    job:
+      machine: ubuntu-19.10
+      type: foreground
       run: |
-        bazel run @graknlabs_build_tools//ci:release-validate-deps-npm -- graknlabs_grakn
+        bazel run @graknlabs_build_tools//sync-dependencies-bazel $GRABL_NEW_DEPENDENCIES         # graql@abc123 protocol@bcd234
+        bazel run @graknlabs_build_tools//sync-dependencies-npm $GRABL_NEW_DEPENDENCIES           # graql@abc123 protocol@bcd234
+        # Committing and pushing to the upstream repo should be done by Grabl
 
-  workflow:
-    - release-validate-deps
+release:
+  config:
+    version: ./VERSION
+  validation:
+    job:
+      machine: ubuntu-19.10
+      type: foreground
+      run: |
+        bazel run @graknlabs_build_tools//ci:release-validate-deps -- graknlabs_grakn_core
+  deployment:
+    jobs:
+    execution:
+  bump:
+    job:
+      machine: ubuntu 19.10
+      type: foreground
+      run: bazel run @graknlabs_build_tools//ci:version-bump
