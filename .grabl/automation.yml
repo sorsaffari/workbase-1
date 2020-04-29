@@ -43,87 +43,98 @@ build:
         script: |
           echo "workflow quality: dependency-analysis"
           # bazel run @graknlabs_build_tools//analysis:dependency -- graql@graknlabs_graql protocol@graknlabs_protocol client-java@graknlabs_client_java
-  correctness:
-    job:
-      build:
-        machine: ubuntu-1910
-        type: foreground
-        script: |
-          echo "workflow correctness: build"
-          # bazel build //...
-  performance:
-    jobs:
-      run-grakn-1:
-        machine: ubuntu-1910
-        type: background
-        timeout: "1800"
-        script: |
-          echo "workflow performance: run-grakn-1"
-          export GRABL_RUN_GRAKN_1="wow"
-          # echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
-          # curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
-          # sudo apt-get update -y
-          # sudo apt-get install -y openjdk-8-jdk pkg-config zip g++ zlib1g-dev unzip python
-          # curl -OL https://raw.githubusercontent.com/graknlabs/build-tools/master/ci/install-bazel-linux.sh
-          # bash ./install-bazel-linux.sh && rm ./install-bazel-linux.sh && hash -r
-          # git clone https://github.com/graknlabs/grakn.git
-          # cd grakn
-          # bazel build //:assemble-linux-targz
-          # mkdir dist
-          # tar -xf ./bazel-bin/grakn-core-all-linux.tar.gz -C ./dist/
-          # cd ./dist/grakn-core-all-linux/
-          # ./grakn server start
-      run-grakn-2:
-        machine: ubuntu-1910
-        type: background
-        script: |
-          echo "workflow performance: run-grakn-2"
-          # bazel build //:grakn-core-all-linux-targz
-          # tar -xf ./bazel-bin/grakn-core-all-linux.targz -C ./dist/
-          # ./grakn server start join $GRABL_PERFORMANCE_RUN_GRAKN_1_ADDRESS
-      run-grakn-3:
-        machine: ubuntu-1910
-        type: background
-        script: |
-          echo "workflow performance: run-grakn-3"
-          # bazel build //:grakn-core-all-linux-targz
-          # tar -xf ./bazel-bin/grakn-core-all-linux.targz -C ./dist/
-          # cd ./dist/
-          # ./grakn server start join $GRABL_PERFORMANCE_RUN_GRAKN_1_ADDRESS
-      test-performance-big:
-        machine: ubuntu-1910
-        type: foreground
-        script: |
-          echo "workflow performance: test-performance-big"
-          # bazel test @graknlabs_simulation//:run --
-          #   --grakn-address $GRABL_PERFORMANCE_RUN_GRAKN_1_ADDRESS
-          #   --org $GRABL_ORG
-          #   --repo $GRABL_REPO
-          #   --commit $GRABL_COMMIT
-          #   --username $GRABL_USERNAME
-          #   --token $GRABL_TOKEN
-          #   --iterations 100000
-    execution:
-      - run-grakn-1
-      - run-grakn-2:
-          depends: [run-grakn-1]
-      - run-grakn-3:
-          depends: [run-grakn-1]
-      - test-performance-big:
-          depends: [run-grakn-1, run-grakn-2, run-grakn-3]
+  # correctness:
+  #   job:
+  #     build:
+  #       machine: ubuntu-1910
+  #       type: foreground
+  #       script: |
+  #         echo "workflow correctness: build"
+  #         # bazel build //...
+  # performance:
+  #   jobs:
+  #     run-grakn-1:
+  #       machine: ubuntu-1910
+  #       type: background
+  #       timeout: "1800"
+  #       script: |
+  #         echo "workflow performance: run-grakn-1"
+  #         export GRABL_RUN_GRAKN_1="wow"
+  #         # echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
+  #         # curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
+  #         # sudo apt-get update -y
+  #         # sudo apt-get install -y openjdk-8-jdk pkg-config zip g++ zlib1g-dev unzip python
+  #         # curl -OL https://raw.githubusercontent.com/graknlabs/build-tools/master/ci/install-bazel-linux.sh
+  #         # bash ./install-bazel-linux.sh && rm ./install-bazel-linux.sh && hash -r
+  #         # git clone https://github.com/graknlabs/grakn.git
+  #         # cd grakn
+  #         # bazel build //:assemble-linux-targz
+  #         # mkdir dist
+  #         # tar -xf ./bazel-bin/grakn-core-all-linux.tar.gz -C ./dist/
+  #         # cd ./dist/grakn-core-all-linux/
+  #         # ./grakn server start
+  #     run-grakn-2:
+  #       machine: ubuntu-1910
+  #       type: background
+  #       script: |
+  #         echo "workflow performance: run-grakn-2"
+  #         # bazel build //:grakn-core-all-linux-targz
+  #         # tar -xf ./bazel-bin/grakn-core-all-linux.targz -C ./dist/
+  #         # ./grakn server start join $GRABL_PERFORMANCE_RUN_GRAKN_1_ADDRESS
+  #     run-grakn-3:
+  #       machine: ubuntu-1910
+  #       type: background
+  #       script: |
+  #         echo "workflow performance: run-grakn-3"
+  #         # bazel build //:grakn-core-all-linux-targz
+  #         # tar -xf ./bazel-bin/grakn-core-all-linux.targz -C ./dist/
+  #         # cd ./dist/
+  #         # ./grakn server start join $GRABL_PERFORMANCE_RUN_GRAKN_1_ADDRESS
+  #     test-performance-big:
+  #       machine: ubuntu-1910
+  #       type: foreground
+  #       script: |
+  #         echo "workflow performance: test-performance-big"
+  #         # bazel test @graknlabs_simulation//:run --
+  #         #   --grakn-address $GRABL_PERFORMANCE_RUN_GRAKN_1_ADDRESS
+  #         #   --org $GRABL_ORG
+  #         #   --repo $GRABL_REPO
+  #         #   --commit $GRABL_COMMIT
+  #         #   --username $GRABL_USERNAME
+  #         #   --token $GRABL_TOKEN
+  #         #   --iterations 100000
+  #   execution:
+  #     - run-grakn-1
+  #     - run-grakn-2:
+  #         depends: [run-grakn-1]
+  #     - run-grakn-3:
+  #         depends: [run-grakn-1]
+  #     - test-performance-big:
+  #         depends: [run-grakn-1, run-grakn-2, run-grakn-3]
 
 release:
   validation:
     job:
-      machine: ubuntu-1910
-      type: foreground
-      script: |
-        bazel run @graknlabs_build_tools//ci:release-validate-deps -- graknlabs_common graknlabs_graql graknlabs_protocol
+      validate-dependencies:
+        machine: ubuntu-1910
+        type: foreground
+        script: |
+          echo "workflow validation: validate-dependencies"
+          # bazel run @graknlabs_build_tools//ci:release-validate-deps -- graknlabs_common graknlabs_graql graknlabs_protocol
   deployment:
-    jobs:
-    execution:
+    job:
+      deploy-workbase:
+        machine: ubuntu-1910
+        type: foreground
+        script: |
+          echo "workflow deployment: deploy-workbase"
+          # bazel run @graknlabs_build_tools//ci:release-validate-deps -- graknlabs_common graknlabs_graql graknlabs_protocol
   bump:
     job:
-      machine: ubuntu-1910
-      type: foreground
-      script: bazel run @graknlabs_build_tools//ci:version-bump
+      bump-version:
+        machine: ubuntu-1910
+        type: foreground
+        script: |
+          echo "workflow bump: bump-version"
+          # bazel run @graknlabs_build_tools//ci:version-bump
+
