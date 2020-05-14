@@ -43,14 +43,14 @@ build:
         script: |
           echo "workflow quality: dependency-analysis"
           # bazel run @graknlabs_build_tools//analysis:dependency -- graql@graknlabs_graql protocol@graknlabs_protocol client-java@graknlabs_client_java
-  # correctness:
-  #   job:
-  #     build:
-  #       machine: ubuntu-1910
-  #       type: foreground
-  #       script: |
-  #         echo "workflow correctness: build"
-  #         # bazel build //...
+  correctness:
+    job:
+      build:
+        machine: ubuntu-1910
+        type: foreground
+        script: |
+          echo "workflow correctness: build"
+          # bazel build //...
   # performance:
   #   jobs:
   #     run-grakn-1:
